@@ -2,9 +2,9 @@ package llama.com.serpentcharts.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.support.annotation.ColorInt;
@@ -35,6 +35,8 @@ public class LineChart extends View {
 
     private int mGridColor;
 
+    private DataSetObserver mObserver;
+
     public LineChart(Context context) {
         super(context);
         init(null);
@@ -62,6 +64,18 @@ public class LineChart extends View {
             mGridColor = a.getColor(R.styleable.LineChart_grid_color, 0);
             a.recycle();
         }
+
+        mObserver = new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                requestLayout();
+            }
+
+            @Override
+            public void onInvalidated() {
+                requestLayout();
+            }
+        };
 
         mPath = new Path();
         mFillPath = new Path();
@@ -115,7 +129,23 @@ public class LineChart extends View {
     }
 
     public void setAdapter(@NonNull Adapter adapter) {
+        setAdapterInternal(adapter);
+        requestLayout();
+    }
+
+    /**
+     * Replaces the current adapter with the new one and triggers listeners.
+     *
+     * @param adapter The new adapter
+     */
+    private void setAdapterInternal(Adapter adapter) {
+        if (mAdapter != null) {
+            mAdapter.unregisterAdapterDataObserver(mObserver);
+        }
         mAdapter = adapter;
+        if (adapter != null) {
+            adapter.registerAdapterDataObserver(mObserver);
+        }
     }
 
     @Override
@@ -161,6 +191,7 @@ public class LineChart extends View {
             }
             mFillPath.set(mPath);
             mFillPath.lineTo(width, height);
+            mFillPath.lineTo(0f, height);
             mFillPath.close();
             mPaint.setAlpha(96);
             mPaint.setStyle(Paint.Style.FILL);
@@ -191,6 +222,20 @@ public class LineChart extends View {
     }
 
     public static abstract class Adapter extends DataSetObserver {
+
+        private DataSetObservable mObservable = new DataSetObservable();
+
+        private void unregisterAdapterDataObserver(@NonNull DataSetObserver observer) {
+            mObservable.unregisterObserver(observer);
+        }
+
+        private void registerAdapterDataObserver(@NonNull DataSetObserver observer) {
+            mObservable.registerObserver(observer);
+        }
+
+        public final void notifyDataSetChanged() {
+            mObservable.notifyChanged();
+        }
 
         /**
          * @return the color for the line with given index
