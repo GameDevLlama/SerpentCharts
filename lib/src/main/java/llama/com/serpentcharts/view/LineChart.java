@@ -34,6 +34,7 @@ public class LineChart extends View {
     private int mDotSize, mLineThickness;
 
     private int mGridColor;
+    private boolean mFillArea = false;
 
     private DataSetObserver mObserver;
 
@@ -62,6 +63,7 @@ public class LineChart extends View {
             mDotSize = a.getDimensionPixelSize(R.styleable.LineChart_dot_size, 0);
             mLineThickness = a.getDimensionPixelSize(R.styleable.LineChart_line_thickness, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, metrics));
             mGridColor = a.getColor(R.styleable.LineChart_grid_color, 0);
+            mFillArea = a.getBoolean(R.styleable.LineChart_fill_area, false);
             a.recycle();
         }
 
@@ -169,6 +171,7 @@ public class LineChart extends View {
             mPaint.setAntiAlias(true);
             mPaint.setStrokeWidth(mLineThickness);
             mPath.reset();
+            mPaint.setStyle(Paint.Style.FILL);
             for (int dataIndex = 1; dataIndex < dataSetSize; dataIndex++) {
                 float relativeX1 = dataSetSize > 1 ? (float) (dataIndex - 1) / (dataSetSize - 1) : 0f;
                 float relativeX2 = dataSetSize > 1 ? (float) (dataIndex) / (dataSetSize - 1) : 0f;
@@ -193,12 +196,13 @@ public class LineChart extends View {
             mFillPath.lineTo(width, height);
             mFillPath.lineTo(0f, height);
             mFillPath.close();
-            mPaint.setAlpha(96);
-            mPaint.setStyle(Paint.Style.FILL);
-            canvas.drawPath(mFillPath, mPaint);
-            mPaint.setAlpha(255);
+            if (mFillArea) {
+                mPaint.setAlpha(96);
+                mPaint.setStyle(Paint.Style.FILL);
+                canvas.drawPath(mFillPath, mPaint);
+                mPaint.setAlpha(255);
+            }
             mPaint.setStyle(Paint.Style.STROKE);
-            mPath.setFillType(Path.FillType.WINDING);
             canvas.drawPath(mPath, mPaint);
         }
     }
@@ -221,7 +225,7 @@ public class LineChart extends View {
         }
     }
 
-    public static abstract class Adapter extends DataSetObserver {
+    public static abstract class Adapter {
 
         private DataSetObservable mObservable = new DataSetObservable();
 

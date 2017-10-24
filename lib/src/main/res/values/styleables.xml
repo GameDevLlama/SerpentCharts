@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <declare-styleable name="LineChart">
         <attr name="grid_color" format="color">#eeeeee</attr>
         <attr name="draw_vertical_grid" format="boolean">true</attr>
@@ -14,5 +15,12 @@
             invisible
         </attr>
         <attr name="dot_size" format="dimension">4dp</attr>
+        <attr name="fill_area" format="boolean">false</attr>
     </declare-styleable>
+
+    <declare-styleable name="PieChart">
+        <attr name="ring" format="boolean">false</attr>
+        <attr name="ring_thickness" format="dimension">10dp</attr>
+    </declare-styleable>
+
 </resources>
