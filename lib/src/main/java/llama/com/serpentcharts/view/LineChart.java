@@ -20,7 +20,7 @@ import java.util.Random;
 import llama.com.serpentcharts.R;
 
 /**
- * @author Christian Ringshofer
+ * @author ringshofer
  * @since 23.10.2017.
  */
 public class LineChart extends View {
@@ -92,15 +92,12 @@ public class LineChart extends View {
                 randomData(394852172673L, 30),
                 randomData(679821983457L, 20)
         };
+        final int[] colors = Editor.getColors(dataSets.length);
         mAdapter = new Adapter() {
 
             @Override
             public int getLineColor(int lineIndex) {
-                TypedValue typedValue = new TypedValue();
-                TypedArray a = getContext().obtainStyledAttributes(typedValue.data, new int[]{R.attr.colorPrimary, R.attr.colorAccent});
-                int color = a.getColor(lineIndex, 0);
-                a.recycle();
-                return color;
+                return colors[lineIndex];
             }
 
             @Override

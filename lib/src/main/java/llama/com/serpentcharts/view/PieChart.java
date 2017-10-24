@@ -16,7 +16,7 @@ import android.view.View;
 import llama.com.serpentcharts.R;
 
 /**
- * @author christianringshofer
+ * @author ringshofer
  */
 public class PieChart extends View {
 
@@ -59,13 +59,7 @@ public class PieChart extends View {
             final float[] values = new float[]{
                     10, 17, 44, 94, 124
             };
-            final int[] colors = new int[]{
-                    Color.rgb(255, 255, 0),
-                    Color.rgb(255, 100, 77),
-                    Color.rgb(180, 40, 230),
-                    Color.rgb(55, 255, 170),
-                    Color.rgb(255, 57, 120),
-            };
+            final int[] colors = Editor.getColors(values.length);
             setAdapter(new Adapter() {
                 @Override
                 public int getCount() {

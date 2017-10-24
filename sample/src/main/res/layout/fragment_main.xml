@@ -22,7 +22,7 @@
 
             <llama.com.serpentcharts.view.LineChart
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="80dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp"
                 android:layout_weight="0.5"
@@ -37,7 +37,7 @@
             <llama.com.serpentcharts.view.LineChart
                 android:id="@+id/line_chart"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="80dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"
                 android:layout_weight="0.5"
@@ -51,22 +51,21 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:orientation="horizontal">
 
             <llama.com.serpentcharts.view.PieChart
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="80dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp"
-                android:layout_marginTop="8dp"
                 android:layout_weight="0.5" />
 
             <llama.com.serpentcharts.view.PieChart
                 android:layout_width="0dp"
-                android:layout_height="160dp"
+                android:layout_height="80dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginStart="4dp"
-                android:layout_marginTop="8dp"
                 android:layout_weight="0.5"
                 app:ring="true"
                 app:ring_thickness="10dp" />
