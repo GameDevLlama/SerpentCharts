@@ -32,8 +32,7 @@ public abstract class ChartView extends View {
     }
 
     private void init() {
-        mObserver = new ChartAdapter.AdapterDataObserver() {
-
+        mObserver = new ChartViewDataObserver() {
             @Override
             public void onChanged() {
                 requestLayout();
@@ -66,6 +65,12 @@ public abstract class ChartView extends View {
         }
     }
 
+    class ChartViewDataObserver extends ChartAdapter.AdapterDataObserver {
+        ChartViewDataObserver() {
+
+        }
+    }
+
     public static abstract class ChartAdapter {
 
         AdapterDataObservable mObservable = new AdapterDataObservable();
@@ -79,12 +84,16 @@ public abstract class ChartView extends View {
         }
 
         public final void notifyDataSetChanged() {
-            // mObservable.notifyChanged();
+            mObservable.notifyDataSetChanged();
         }
 
-        public  static class AdapterDataObserver extends DataSetObserver {
+        private abstract static class AdapterDataObserver extends DataSetObserver {
 
-            public  void onItemRangeChanged(int positionStart, int itemCount){
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+
+            }
+
+            public void onItemRangeChanged(int positionStart, int itemCount) {
 
             }
 
@@ -94,7 +103,19 @@ public abstract class ChartView extends View {
 
             private void notifyDataRangeInserted(int positionStart, int itemCount) {
                 for (int i = mObservers.size() - 1; i >= 0; i--) {
+                    mObservers.get(i).onItemRangeInserted(positionStart, itemCount);
+                }
+            }
+
+            private void notifyDataRangeChanged(int positionStart, int itemCount) {
+                for (int i = mObservers.size() - 1; i >= 0; i--) {
                     mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
+                }
+            }
+
+            public void notifyDataSetChanged() {
+                for (int i = mObservers.size() - 1; i >= 0; i--) {
+                    mObservers.get(i).onChanged();
                 }
             }
 
