@@ -35,12 +35,12 @@ public abstract class ChartView extends View {
         mObserver = new ChartViewDataObserver() {
             @Override
             public void onChanged() {
-                requestLayout();
+                invalidate();
             }
 
             @Override
             public void onInvalidated() {
-                requestLayout();
+                invalidate();
             }
         };
     }
