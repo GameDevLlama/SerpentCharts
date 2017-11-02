@@ -4,8 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 
 /**
- * @author Christian Ringshofer
- * @since 24.10.2017.
+ * @author theWhiteLlama
  */
 class Editor {
 

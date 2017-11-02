@@ -3,7 +3,6 @@ package llama.com.serpentcharts.view;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -16,7 +15,7 @@ import android.view.View;
 import llama.com.serpentcharts.R;
 
 /**
- * @author ringshofer
+ * @author theWhiteLlama
  */
 public class PieChart extends View {
 

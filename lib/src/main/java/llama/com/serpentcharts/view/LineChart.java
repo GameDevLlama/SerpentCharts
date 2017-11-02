@@ -20,8 +20,7 @@ import java.util.Random;
 import llama.com.serpentcharts.R;
 
 /**
- * @author ringshofer
- * @since 23.10.2017.
+ * @author theWhiteLlama
  */
 public class LineChart extends View {
 
@@ -123,7 +122,7 @@ public class LineChart extends View {
         Random random = new Random(seed);
         float[] data = new float[size];
         for (int i = 0; i < data.length; i++)
-            data[i] = (float) (Math.sin(i) * Math.sin(i * 13) * 0.2f + random.nextFloat() * 0.025f - 0.0125f) * 100f + i * 4;
+            data[i] = (float) (Math.sin(i) * Math.sin(i * 13) * 0.1f + random.nextFloat() * 0.025f - 0.0125f) * 100f + i * 3;
         return data;
     }
 
