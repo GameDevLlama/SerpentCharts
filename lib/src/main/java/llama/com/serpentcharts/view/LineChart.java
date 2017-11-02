@@ -2,8 +2,6 @@ package llama.com.serpentcharts.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -13,7 +11,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.View;
 
 import java.util.Random;
 
@@ -22,9 +19,8 @@ import llama.com.serpentcharts.R;
 /**
  * @author theWhiteLlama
  */
-public class LineChart extends View {
+public class LineChart extends ChartView {
 
-    private Adapter mAdapter;
     private Paint mPaint;
     private Path mPath, mFillPath;
 
@@ -34,8 +30,6 @@ public class LineChart extends View {
 
     private int mGridColor;
     private boolean mFillArea = false;
-
-    private DataSetObserver mObserver;
 
     public LineChart(Context context) {
         super(context);
@@ -65,19 +59,6 @@ public class LineChart extends View {
             mFillArea = a.getBoolean(R.styleable.LineChart_fill_area, false);
             a.recycle();
         }
-
-        mObserver = new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                requestLayout();
-            }
-
-            @Override
-            public void onInvalidated() {
-                requestLayout();
-            }
-        };
-
         mPath = new Path();
         mFillPath = new Path();
         mPaint = new Paint();
@@ -126,43 +107,24 @@ public class LineChart extends View {
         return data;
     }
 
-    public void setAdapter(@NonNull Adapter adapter) {
-        setAdapterInternal(adapter);
-        requestLayout();
-    }
-
-    /**
-     * Replaces the current adapter with the new one and triggers listeners.
-     *
-     * @param adapter The new adapter
-     */
-    private void setAdapterInternal(Adapter adapter) {
-        if (mAdapter != null) {
-            mAdapter.unregisterAdapterDataObserver(mObserver);
-        }
-        mAdapter = adapter;
-        if (adapter != null) {
-            adapter.registerAdapterDataObserver(mObserver);
-        }
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mAdapter == null) // user must set a adapter for this view
-            throw new IllegalStateException(String.format("Missing %s!", Adapter.class.getName()));
+        if (!(mAdapter instanceof Adapter)) // user must set a adapter for this view
+            throw new IllegalStateException(String.format("No instance of %s provided", Adapter.class.getName()));
         float width = getWidth();
         float height = getHeight();
         float density = getResources().getDisplayMetrics().density;
         drawVerticalGridLines(canvas, width, height, density);
         drawHorizontalGridLines(canvas, width, height, density);
-        int countLines = mAdapter.getCountLines();
-        float minY = mAdapter.getMinY();
-        float maxY = mAdapter.getMaxY();
+        Adapter adapter = (Adapter) mAdapter;
+        int countLines = adapter.getCountLines();
+        float minY = adapter.getMinY();
+        float maxY = adapter.getMaxY();
         float deltaY = maxY - minY;
         for (int i = 0; i < countLines; i++) {
-            int color = mAdapter.getLineColor(i);
-            int dataSetSize = mAdapter.getDataCount(i);
+            int color = adapter.getLineColor(i);
+            int dataSetSize = adapter.getDataCount(i);
             mPaint.setColor(color);
             mPaint.setAntiAlias(true);
             mPaint.setStrokeWidth(mLineThickness);
@@ -171,8 +133,8 @@ public class LineChart extends View {
             for (int dataIndex = 1; dataIndex < dataSetSize; dataIndex++) {
                 float relativeX1 = dataSetSize > 1 ? (float) (dataIndex - 1) / (dataSetSize - 1) : 0f;
                 float relativeX2 = dataSetSize > 1 ? (float) (dataIndex) / (dataSetSize - 1) : 0f;
-                float dataY1 = mAdapter.getDataY(i, dataIndex - 1);
-                float dataY2 = mAdapter.getDataY(i, dataIndex);
+                float dataY1 = adapter.getDataY(i, dataIndex - 1);
+                float dataY2 = adapter.getDataY(i, dataIndex);
                 float relativeDataY1 = deltaY != 0 ? (dataY1 - minY) / deltaY : 0f;
                 float relativeDataY2 = deltaY != 0 ? (dataY2 - minY) / deltaY : 0f;
                 if (dataIndex == 1) {
@@ -221,21 +183,7 @@ public class LineChart extends View {
         }
     }
 
-    public static abstract class Adapter {
-
-        private DataSetObservable mObservable = new DataSetObservable();
-
-        private void unregisterAdapterDataObserver(@NonNull DataSetObserver observer) {
-            mObservable.unregisterObserver(observer);
-        }
-
-        private void registerAdapterDataObserver(@NonNull DataSetObserver observer) {
-            mObservable.registerObserver(observer);
-        }
-
-        public final void notifyDataSetChanged() {
-            mObservable.notifyChanged();
-        }
+    public static abstract class Adapter extends ChartAdapter {
 
         /**
          * @return the color for the line with given index

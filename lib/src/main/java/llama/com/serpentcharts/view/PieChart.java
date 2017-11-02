@@ -10,14 +10,13 @@ import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.view.View;
 
 import llama.com.serpentcharts.R;
 
 /**
  * @author theWhiteLlama
  */
-public class PieChart extends View {
+public class PieChart extends ChartView {
 
     private Paint mPaint;
     private Path mPath;
@@ -25,9 +24,6 @@ public class PieChart extends View {
 
     private boolean mRing = false;
     private int mRingThickness = 0;
-
-    @Nullable
-    private Adapter mAdapter;
 
     @NonNull
     private float[] mValues = new float[0], mInterpolatedValues = new float[0];
@@ -85,6 +81,8 @@ public class PieChart extends View {
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
+        if (!(mAdapter instanceof Adapter)) // user must set a adapter for this view
+            throw new IllegalStateException(String.format("No instance of %s provided", LineChart.Adapter.class.getName()));
         float width = getWidth();
         float height = getHeight();
         float radius = Math.min(width, height) * 0.5f;
@@ -106,50 +104,49 @@ public class PieChart extends View {
         mPath.reset();
         mPath.moveTo((width + radius) * 0.5f, height * 0.5f);
 
-        if (mAdapter != null) {
-            int count = mAdapter.getCount();
-            float sum = 0;
-            for (int i = 0; i < count; i++) {
-                sum += Math.max(0f, mAdapter.getValue(i));
-            }
-            float current = 0;
-            for (int i = 0; i < count; i++) {
-                float value = mAdapter.getValue(i);
-                float relativeValue = value / sum;
-                current += Math.max(0f, relativeValue);
-                mPath.reset();
-                float radians = (float) ((current - relativeValue) * 2f * Math.PI);
-                float cos = (float) Math.cos(radians);
-                float sin = (float) Math.sin(radians);
-                if (mRing) {
-                    mPath.moveTo(
-                            width * 0.5f + cos * innerRadius,
-                            height * 0.5f + sin * innerRadius
-                    );
-                } else {
-                    mPath.moveTo(width * 0.5f, height * 0.5f);
-                }
-                mPath.lineTo(
-                        width * 0.5f + cos * radius,
-                        height * 0.5f + sin * radius
+        Adapter adapter = (Adapter) mAdapter;
+        int count = adapter.getCount();
+        float sum = 0;
+        for (int i = 0; i < count; i++) {
+            sum += Math.max(0f, adapter.getValue(i));
+        }
+        float current = 0;
+        for (int i = 0; i < count; i++) {
+            float value = adapter.getValue(i);
+            float relativeValue = value / sum;
+            current += Math.max(0f, relativeValue);
+            mPath.reset();
+            float radians = (float) ((current - relativeValue) * 2f * Math.PI);
+            float cos = (float) Math.cos(radians);
+            float sin = (float) Math.sin(radians);
+            if (mRing) {
+                mPath.moveTo(
+                        width * 0.5f + cos * innerRadius,
+                        height * 0.5f + sin * innerRadius
                 );
-                mPath.arcTo(mOval, (current - relativeValue) * 360f, relativeValue * 360f);
-                if (mRing) {
-                    radians = (float) (current * 2f * Math.PI);
-                    cos = (float) Math.cos(radians);
-                    sin = (float) Math.sin(radians);
-                    mPath.lineTo(
-                            width * 0.5f + cos * innerRadius,
-                            height * 0.5f + sin * innerRadius
-                    );
-                    mPath.arcTo(mInnerOval, current * 360f, -relativeValue * 360f);
-                } else {
-                    mPath.lineTo(width * 0.5f, height * 0.5f);
-                }
-                mPath.close();
-                mPaint.setColor(mAdapter.getColor(i));
-                canvas.drawPath(mPath, mPaint);
+            } else {
+                mPath.moveTo(width * 0.5f, height * 0.5f);
             }
+            mPath.lineTo(
+                    width * 0.5f + cos * radius,
+                    height * 0.5f + sin * radius
+            );
+            mPath.arcTo(mOval, (current - relativeValue) * 360f, relativeValue * 360f);
+            if (mRing) {
+                radians = (float) (current * 2f * Math.PI);
+                cos = (float) Math.cos(radians);
+                sin = (float) Math.sin(radians);
+                mPath.lineTo(
+                        width * 0.5f + cos * innerRadius,
+                        height * 0.5f + sin * innerRadius
+                );
+                mPath.arcTo(mInnerOval, current * 360f, -relativeValue * 360f);
+            } else {
+                mPath.lineTo(width * 0.5f, height * 0.5f);
+            }
+            mPath.close();
+            mPaint.setColor(adapter.getColor(i));
+            canvas.drawPath(mPath, mPaint);
         }
 
     }
@@ -158,7 +155,7 @@ public class PieChart extends View {
         mAdapter = adapter;
     }
 
-    public abstract static class Adapter {
+    public abstract static class Adapter extends ChartAdapter {
 
         public abstract int getCount();
 
