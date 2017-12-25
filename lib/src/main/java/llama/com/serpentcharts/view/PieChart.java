@@ -66,6 +66,8 @@ public class PieChart extends ChartView {
             @Override
             public void onInvalidated() {
                 mValues.clear();
+                PieChart.Adapter adapter = (Adapter) mAdapter;
+                for (int i = 0; i < adapter.getCount(); i++) mValues.add(adapter.getValue(i));
                 invalidate();
             }
 
@@ -121,6 +123,7 @@ public class PieChart extends ChartView {
                     return values[index];
                 }
             });
+            mAdapter.notifyDataSetChanged(); // TODO find fix for hacky xml layout solution
         }
         mPaint = new Paint();
         mPath = new Path();
