@@ -115,7 +115,7 @@ public class PieChart extends ChartView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
         if (!(mAdapter instanceof Adapter)) // user must set a adapter for this view
-            throw new IllegalStateException(String.format("No instance of %s provided", LineChart.Adapter.class.getName()));
+            throw new IllegalStateException(String.format("No instance of %s provided", PieChart.Adapter.class.getName()));
         float width = getWidth();
         float height = getHeight();
         float radius = Math.min(width, height) * 0.5f;
