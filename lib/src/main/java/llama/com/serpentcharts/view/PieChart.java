@@ -18,6 +18,9 @@ import java.util.List;
 
 import llama.com.serpentcharts.R;
 
+import static android.view.View.MeasureSpec.AT_MOST;
+import static android.view.View.MeasureSpec.EXACTLY;
+
 /**
  * @author theWhiteLlama
  */
@@ -137,24 +140,33 @@ public class PieChart extends ChartView {
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-        int width;
-        int height;
-        int diameter = Math.max(widthSize, heightSize);
-        // measure the width
-        if (widthMode == MeasureSpec.EXACTLY) {
-            width = widthSize;
-        } else if (widthMode == MeasureSpec.AT_MOST) {
-            width = Math.min(diameter, widthSize);
-        } else {
+        int width, height, diameter;
+
+        if (widthMode == EXACTLY && heightMode == EXACTLY) {
+            diameter = Math.min(widthSize, heightSize);
             width = diameter;
-        }
-        // measure the height
-        if (heightMode == MeasureSpec.EXACTLY) {
-            height = heightSize;
-        } else if (heightMode == MeasureSpec.AT_MOST) {
-            height = Math.min(diameter, heightSize);
-        } else {
             height = diameter;
+        } else if (widthMode == EXACTLY) {
+            if (heightMeasureSpec == AT_MOST) {
+                diameter = Math.min(widthSize, heightSize);
+                width = diameter;
+                height = diameter;
+            } else {
+                width = widthSize;
+                height = widthSize;
+            }
+        } else if (heightMode == EXACTLY) {
+            if (widthMeasureSpec == AT_MOST) {
+                diameter = Math.min(widthSize, heightSize);
+                width = diameter;
+                height = diameter;
+            } else {
+                width = heightSize;
+                height = heightSize;
+            }
+        } else {
+            width = 100;
+            height = 100;
         }
         setMeasuredDimension(width, height);
     }
