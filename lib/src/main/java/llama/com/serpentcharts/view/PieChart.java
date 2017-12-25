@@ -13,6 +13,9 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import llama.com.serpentcharts.R;
 
 /**
@@ -30,7 +33,8 @@ public class PieChart extends ChartView {
     private int mRingThickness = 0;
 
     @NonNull
-    private float[] mValues = new float[0], mInterpolatedValues = new float[0];
+    private List<Float> mValues = new ArrayList<>();
+    private List<Float> mInterpolatedValues = new ArrayList<>();
 
     public PieChart(Context context) {
         super(context);
@@ -45,6 +49,47 @@ public class PieChart extends ChartView {
     public PieChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(attrs, defStyleAttr);
+    }
+
+    @NonNull
+    @Override
+    ChartAdapter.AdapterDataObserver createObserver() {
+        return new ChartViewDataObserver() {
+            @Override
+            public void onChanged() {
+                mValues.clear();
+                PieChart.Adapter adapter = (Adapter) mAdapter;
+                for (int i = 0; i < adapter.getCount(); i++) mValues.add(adapter.getValue(i));
+                invalidate();
+            }
+
+            @Override
+            public void onInvalidated() {
+                mValues.clear();
+                invalidate();
+            }
+
+            @Override
+            void onItemRangeInserted(int positionStart, int itemCount) {
+                PieChart.Adapter adapter = (Adapter) mAdapter;
+                for (int i = 0; i < itemCount; i++) {
+                    mValues.add(positionStart + i, adapter.getValue(positionStart + i));
+                }
+            }
+
+            @Override
+            void onItemRangeChanged(int positionStart, int itemCount) {
+                PieChart.Adapter adapter = (Adapter) mAdapter;
+                for (int i = 0; i < itemCount; i++) {
+                    mValues.set(positionStart + i, adapter.getValue(positionStart + i));
+                }
+            }
+
+            @Override
+            void onItemRangeRemoved(int positionStart, int itemCount) {
+            }
+
+        };
     }
 
     private void init(@Nullable AttributeSet attrs, int defStyle) {
@@ -138,15 +183,15 @@ public class PieChart extends ChartView {
         mPath.moveTo((width + radius) * 0.5f, height * 0.5f);
 
         Adapter adapter = (Adapter) mAdapter;
-        int count = adapter.getCount();
+        int count = mValues.size(); // adapter.getCount();
         if (count > 1) {
             float sum = 0;
             for (int i = 0; i < count; i++) {
-                sum += Math.max(0f, adapter.getValue(i));
+                sum += Math.max(0f, mValues.get(i)/*adapter.getValue(i)*/);
             }
             float current = 0;
             for (int i = 0; i < count; i++) {
-                float value = adapter.getValue(i);
+                float value = mValues.get(i) /*adapter.getValue(i)*/;
                 float relativeValue = value / sum;
                 current += Math.max(0f, relativeValue);
                 mPath.reset();

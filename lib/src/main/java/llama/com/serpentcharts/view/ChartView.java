@@ -32,17 +32,6 @@ public abstract class ChartView extends View {
     }
 
     private void init() {
-        mObserver = new ChartViewDataObserver() {
-            @Override
-            public void onChanged() {
-                invalidate();
-            }
-
-            @Override
-            public void onInvalidated() {
-                invalidate();
-            }
-        };
     }
 
     public void setAdapter(@NonNull ChartAdapter adapter) {
@@ -57,13 +46,22 @@ public abstract class ChartView extends View {
      */
     private void setAdapterInternal(ChartAdapter adapter) {
         if (mAdapter != null) {
-            mAdapter.unregisterAdapterDataObserver(mObserver);
+            mAdapter.unregisterAdapterDataObserver(retrieveObserver());
         }
         mAdapter = adapter;
         if (adapter != null) {
-            adapter.registerAdapterDataObserver(mObserver);
+            adapter.registerAdapterDataObserver(retrieveObserver());
         }
     }
+
+    @NonNull
+    private ChartAdapter.AdapterDataObserver retrieveObserver() {
+        if (mObserver == null) mObserver = createObserver();
+        return mObserver;
+    }
+
+    @NonNull
+    abstract ChartAdapter.AdapterDataObserver createObserver();
 
     class ChartViewDataObserver extends ChartAdapter.AdapterDataObserver {
         ChartViewDataObserver() {
@@ -73,7 +71,8 @@ public abstract class ChartView extends View {
 
     public static abstract class ChartAdapter {
 
-        AdapterDataObservable mObservable = new AdapterDataObservable();
+        @NonNull
+        private final AdapterDataObservable mObservable = new AdapterDataObservable();
 
         void unregisterAdapterDataObserver(@NonNull AdapterDataObserver observer) {
             mObservable.unregisterObserver(observer);
@@ -87,19 +86,23 @@ public abstract class ChartView extends View {
             mObservable.notifyDataSetChanged();
         }
 
-        private abstract static class AdapterDataObserver extends DataSetObserver {
+        abstract static class AdapterDataObserver extends DataSetObserver {
 
-            public void onItemRangeInserted(int positionStart, int itemCount) {
+            void onItemRangeInserted(int positionStart, int itemCount) {
 
             }
 
-            public void onItemRangeChanged(int positionStart, int itemCount) {
+            void onItemRangeChanged(int positionStart, int itemCount) {
+
+            }
+
+            void onItemRangeRemoved(int positionStart, int itemCount) {
 
             }
 
         }
 
-        private static class AdapterDataObservable extends Observable<AdapterDataObserver> {
+        static class AdapterDataObservable extends Observable<AdapterDataObserver> {
 
             private void notifyDataRangeInserted(int positionStart, int itemCount) {
                 for (int i = mObservers.size() - 1; i >= 0; i--) {
@@ -110,6 +113,12 @@ public abstract class ChartView extends View {
             private void notifyDataRangeChanged(int positionStart, int itemCount) {
                 for (int i = mObservers.size() - 1; i >= 0; i--) {
                     mObservers.get(i).onItemRangeChanged(positionStart, itemCount);
+                }
+            }
+
+            private void notifyDataRangeRemoved(int positionStart, int itemCount) {
+                for (int i = mObservers.size() - 1; i >= 0; i--) {
+                    mObservers.get(i).onItemRangeRemoved(positionStart, itemCount);
                 }
             }
 

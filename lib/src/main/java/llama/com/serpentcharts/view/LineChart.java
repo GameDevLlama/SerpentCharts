@@ -46,6 +46,22 @@ public class LineChart extends ChartView {
         init(attrs);
     }
 
+    @NonNull
+    @Override
+    ChartAdapter.AdapterDataObserver createObserver() {
+        return new ChartViewDataObserver() {
+            @Override
+            public void onChanged() {
+                invalidate();
+            }
+
+            @Override
+            public void onInvalidated() {
+                invalidate();
+            }
+        };
+    }
+
     private void init(@Nullable AttributeSet attrs) {
         if (attrs != null) {
             DisplayMetrics metrics = getResources().getDisplayMetrics();
